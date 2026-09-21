@@ -397,6 +397,9 @@
       zoomSnap: 0.25,   // lets fitBounds settle on a fractional zoom so Tamil Nadu fills the box
       minZoom: 6
     });
+    // Leaflet 1.9 prefixes its credit with a Ukrainian-flag glyph; keep the credit, drop the flag.
+    map.attributionControl.setPrefix(
+      '<a href="https://leafletjs.com" target="_blank" rel="noopener noreferrer">Leaflet</a>');
 
     var baseLayer = null;
     function addBasemap(kind) {
