@@ -1,0 +1,47 @@
+name: Deploy site to GitHub Pages
+
+# Publishes the static calculator in site/ on every push to main.
+# The repository root holds the plan, research and tests; only site/ is served.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Refuse placeholder tokens in the published site
+        run: |
+          if grep -rnE "YOUR_|XXXXX|TODO|info@|\+91 98765" site --include='*.html' --include='*.js' --include='*.css' --include='*.md' | grep -v 'site/vendor'; then
+            echo "Placeholder tokens found in site/ - refusing to publish."
+            exit 1
+          fi
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site/ as the Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

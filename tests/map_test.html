@@ -1,0 +1,82 @@
+<!-- WP5 map test harness — not part of the site; exercises OxyMap.init/highlight in isolation. -->
+<!-- Loads vendored Leaflet + the three site/data/*.data.js files + site/js/map.js from ../site/. -->
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>OxyMap test harness</title>
+<link rel="stylesheet" href="../site/vendor/leaflet/leaflet.css">
+<style>
+  html, body { margin: 0; padding: 16px; background: #0b1a1d; color: #dcf2ee; font: 14px/1.4 Arial, sans-serif; }
+  h1 { font-size: 16px; margin: 0 0 12px; }
+  #map { width: 900px; height: 600px; border: 1px solid #14d8c4; }
+  #log { white-space: pre-wrap; margin-top: 12px; padding: 10px; background: #06171a; border: 1px solid #244; max-width: 900px; }
+  .ok { color: #6ee7b7; }
+  .err { color: #ff6b4a; }
+</style>
+</head>
+<body>
+<h1>OxyMap test harness (WP5)</h1>
+<div id="map"></div>
+<div id="log">Loading…</div>
+
+<script src="../site/vendor/leaflet/leaflet.js"></script>
+<script src="../site/data/tn_districts.data.js"></script>
+<script src="../site/data/hotspots.data.js"></script>
+<script src="../site/data/climate.data.js"></script>
+<script src="../site/js/map.js"></script>
+<script>
+(function () {
+  'use strict';
+  var logEl = document.getElementById('log');
+  var lines = [];
+
+  function log(msg, cls) {
+    lines.push(cls ? '<span class="' + cls + '">' + msg + '</span>' : msg);
+    logEl.innerHTML = lines.join('\n');
+  }
+
+  try {
+    if (typeof window.OXY_DATA === 'undefined') {
+      throw new Error('window.OXY_DATA is undefined — data files did not load (check plan/DATA_STATUS.md exists and site/data/*.data.js are present).');
+    }
+    var data = window.OXY_DATA;
+    var missing = ['districts', 'hotspots', 'climate'].filter(function (k) { return !data[k]; });
+    if (missing.length) {
+      throw new Error('OXY_DATA is missing: ' + missing.join(', '));
+    }
+
+    var districtCount = Array.isArray(data.districts.features) ? data.districts.features.length : 0;
+    var hotspotCount = Array.isArray(data.hotspots) ? data.hotspots.length : 0;
+
+    log('OXY_DATA loaded.', 'ok');
+    log('Districts (polygons) in data: ' + districtCount);
+    log('Hotspots (markers) in data: ' + hotspotCount);
+
+    var onDistrictCalls = [];
+    var map = window.OxyMap.init('map', data, {
+      onDistrict: function (name) {
+        onDistrictCalls.push(name);
+        log('onDistrict callback fired for: ' + name);
+      }
+    });
+    map.invalidateSize();
+    log('OxyMap.init() completed.', 'ok');
+
+    window.OxyMap.highlight('Tiruchirappalli');
+    log('OxyMap.highlight("Tiruchirappalli") called.', 'ok');
+
+    // Exposed for any external inspection (e.g. a headless-Chrome DOM dump).
+    window.__oxyMapTestResult = {
+      districtCount: districtCount,
+      hotspotCount: hotspotCount,
+      onDistrictCalls: onDistrictCalls
+    };
+  } catch (err) {
+    log('ERROR: ' + (err && err.message ? err.message : String(err)), 'err');
+    if (typeof console !== 'undefined' && console.error) console.error(err);
+  }
+})();
+</script>
+</body>
+</html>
