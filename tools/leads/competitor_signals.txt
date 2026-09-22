@@ -1,0 +1,44 @@
+# Words that, found in a request's name, village, e-mail or referrer, send it to REVIEW.
+# One lower-case pattern per line; substring match; lines starting with # are ignored.
+# Patterns only. Add real company names and domains here as you meet them — never guess one.
+# Maintained by the owner. Status: ASSUMED starting list, 2026-09-22.
+
+# vendor and corporate words
+nano
+bubble
+aerat
+oxygen
+oxy
+pvt
+ltd
+llp
+limited
+technolog
+enterprise
+solution
+industr
+aquatech
+aqua tech
+aquacult
+equipment
+distributor
+dealer
+supplier
+import
+export
+engineering
+systems
+innovation
+machinery
+agro tech
+agrotech
+hatchery supplies
+
+# junk and test entries
+test
+demo
+asdf
+qwerty
+example
+sample
+lorem

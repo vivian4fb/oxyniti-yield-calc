@@ -1,0 +1,77 @@
+{
+  "v": 1,
+  "lead_id": "OXY-20260922-K7Q4M",
+  "ts": "2026-09-22T10:00:00.000Z",
+  "contact": {
+    "name": "முருகன் S",
+    "phone": "+919840012345",
+    "village": "Lalgudi",
+    "role": "owner",
+    "ponds": "2-5",
+    "area_total_acre": 3.5,
+    "email": null,
+    "best_time": "evening"
+  },
+  "inputs": {
+    "district": "Tiruchirappalli",
+    "station_name": null,
+    "species": "gift-tilapia",
+    "area_acre": 1,
+    "depth_m": 1.5,
+    "density_per_acre": 5965,
+    "stock_month": 6,
+    "price_inr_kg": 120,
+    "feed_price_inr_kg": 60,
+    "bloom": "medium",
+    "existing_aeration_kw": 0,
+    "existing_run_h": 0,
+    "tariff_id": "lt-iii-a1",
+    "tariff_inr_kwh": null,
+    "unit_model": "oxy-nano-1.5hp",
+    "n_units": null,
+    "o2_input_lpm_override": null,
+    "power_kw_override": null,
+    "unit_price_inr": 85000,
+    "concentrator_kw": 0.69,
+    "concentrator_price_inr": 45000,
+    "maintenance_pct": 3,
+    "subsidy_pct": 0,
+    "run_h": 8,
+    "include_fcr_gain": false
+  },
+  "signals": {
+    "lang": "en",
+    "t_ms": 42000,
+    "interactions": 7,
+    "tz_min": -330,
+    "ref_host": "www.instagram.com",
+    "ua": "Mozilla/5.0 test",
+    "viewport": "390x844",
+    "pointer": "coarse",
+    "turnstile_token": null
+  },
+  "page": "https://vivian4fb.github.io/oxyniti-yield-calc/",
+  "headline": {
+    "extra_kg_crop": [
+      10.2,
+      20.1
+    ],
+    "extra_kg_year": [
+      20.4,
+      40.2
+    ],
+    "extra_profit_year_inr": [
+      -57000,
+      -30000
+    ],
+    "payback_status": "blocked",
+    "payback_months": null,
+    "payback_reason": "no payback",
+    "capex_inr": 130000,
+    "n_units": 1,
+    "n_best": 1,
+    "warnings": [
+      "NO_PAYBACK_AT_PUBLISHED_O2"
+    ]
+  }
+}

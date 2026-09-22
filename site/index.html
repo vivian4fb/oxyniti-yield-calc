@@ -290,11 +290,13 @@
 
             <p class="ceiling-note" data-i18n="results.ceiling_note">Capped at the internal model's +18 % saleable kg (+12 % growth, +5 points survival), applied in proportion to how oxygen-limited the pond is in each crop month. Not a guarantee. We verify on your pond with a DO meter during the free demo.</p>
 
-            <div class="cta-row">
-              <a id="cta-whatsapp" class="btn btn-warm" href="https://wa.me/919659727477" target="_blank" rel="noopener" data-i18n="results.cta_whatsapp">Send to WhatsApp</a>
-              <button id="cta-copy" class="btn btn-ghost" type="button" data-i18n="results.cta_copy">Copy summary</button>
+            <div class="gate-note" id="gate-note">
+              <span class="gate-lock" aria-hidden="true">&#128274;</span>
+              <span data-i18n="results.gate_note">Extra profit, payback, unit sizing, the month-by-month oxygen budget and the charts go into a written report for your pond. We check every request by hand before sending it.</span>
             </div>
-            <p class="copy-status" id="copy-status" role="status"></p>
+            <div class="cta-row">
+              <button id="cta-report" class="btn btn-warm" type="button" data-i18n="results.cta_report">Get my pond report</button>
+            </div>
           </div>
         </div>
       </div>
@@ -308,6 +310,7 @@
         <h3 data-i18n="season.h3">Seasonal strip</h3>
         <p class="sub" data-i18n="season.sub">Water temperature, thermal suitability and oxygen stress before/after, month by month.</p>
         <div id="season-strip"></div>
+        <p class="chart-locked hidden" id="season-locked" data-i18n="chart.locked">Included in your pond report.</p>
       </div>
     </div>
   </section>
@@ -336,6 +339,7 @@
             <tbody id="station-compare-tbody"></tbody>
           </table>
         </div>
+        <p class="chart-locked hidden" id="compare-locked" data-i18n="chart.locked">Included in your pond report.</p>
       </div>
     </div>
   </section>
@@ -347,6 +351,7 @@
         <h3 data-i18n="waterfall.h3">Profit waterfall</h3>
         <p class="sub" data-i18n="waterfall.sub">How the extra profit is built, per crop — low case and high case side by side.</p>
         <div id="waterfall"></div>
+        <p class="chart-locked hidden" id="waterfall-locked" data-i18n="chart.locked">Included in your pond report.</p>
       </div>
     </div>
   </section>
@@ -407,6 +412,109 @@
     </div>
   </section>
 
+  <!-- ═══════════ LEAD FORM (plan/LEAD_CAPTURE.md) ═══════════ -->
+  <dialog id="lead-dialog" class="lead-dialog" aria-labelledby="lead-h3">
+    <div class="lead-dialog-inner">
+      <button type="button" class="lead-close" id="lead-close" aria-label="Close">&times;</button>
+      <form id="lead-form" class="lead-form" novalidate autocomplete="on">
+        <h3 id="lead-h3" data-i18n="lead.h3">Get your pond report</h3>
+        <p class="sub" data-i18n="lead.sub">Tell us where to send it. Every request is checked by a person before the report goes out, so please give the details a field representative could call you on.</p>
+
+        <div id="lead-form-error" class="lead-error hidden" role="alert"></div>
+
+        <div class="field">
+          <label class="field-label" for="lead-name" data-i18n="lead.name">Name</label>
+          <input type="text" id="lead-name" name="name" maxlength="80" autocomplete="name" required />
+        </div>
+        <div class="field">
+          <label class="field-label" for="lead-phone" data-i18n="lead.phone">WhatsApp number</label>
+          <input type="tel" id="lead-phone" name="phone" inputmode="tel" autocomplete="tel" placeholder="10-digit mobile" required />
+          <p class="field-hint" data-i18n="lead.phone_hint">10-digit Indian mobile number. The report is sent to this number.</p>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="lead-village" data-i18n="lead.village">Village / town</label>
+            <input type="text" id="lead-village" name="village" maxlength="80" autocomplete="address-level2" required />
+          </div>
+          <div class="field">
+            <label class="field-label" for="lead-district" data-i18n="lead.district">District</label>
+            <input type="text" id="lead-district" name="district" readonly tabindex="-1" />
+            <p class="field-hint" data-i18n="lead.district_hint">From the map above; change it there.</p>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="lead-role" data-i18n="lead.role">You are</label>
+            <select id="lead-role" name="role" required>
+              <option value="" data-i18n="lead.role.choose">Choose</option>
+              <option value="owner" data-i18n="lead.role.owner">Farm owner</option>
+              <option value="manager" data-i18n="lead.role.manager">Farm manager</option>
+              <option value="planning" data-i18n="lead.role.planning">Planning a new pond</option>
+              <option value="consultant" data-i18n="lead.role.consultant">Consultant / trader</option>
+              <option value="supplier" data-i18n="lead.role.supplier">Equipment supplier</option>
+              <option value="other" data-i18n="lead.role.other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label" for="lead-ponds" data-i18n="lead.ponds">Number of ponds</label>
+            <select id="lead-ponds" name="ponds" required>
+              <option value="" data-i18n="lead.ponds.choose">Choose</option>
+              <option value="1">1</option>
+              <option value="2-5">2 to 5</option>
+              <option value="6-20">6 to 20</option>
+              <option value="20+">More than 20</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="lead-area-total" data-i18n="lead.area_total">Total water area (acres, optional)</label>
+            <input type="number" id="lead-area-total" name="area_total_acre" min="0.1" max="5000" step="0.25" inputmode="decimal" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="lead-best-time" data-i18n="lead.best_time">Best time to call (optional)</label>
+            <input type="text" id="lead-best-time" name="best_time" maxlength="40" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="lead-email" data-i18n="lead.email">E-mail (optional)</label>
+          <input type="text" id="lead-email" name="email" inputmode="email" autocomplete="email" maxlength="120" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="lead-challenge" id="lead-challenge-q" data-i18n="lead.challenge">Quick check: what is</label>
+          <input type="number" id="lead-challenge" name="challenge" inputmode="numeric" autocomplete="off" required />
+        </div>
+        <!-- honeypot: invisible to people, tempting to bots -->
+        <div class="lead-hp" aria-hidden="true">
+          <label for="lead-website" data-i18n="lead.honeypot_label">Website</label>
+          <input type="text" id="lead-website" name="website" tabindex="-1" autocomplete="off" />
+        </div>
+        <div id="lead-turnstile" class="cf-turnstile"></div>
+        <div class="field field-check">
+          <input type="checkbox" id="lead-consent" name="consent" required />
+          <label for="lead-consent" data-i18n="lead.consent">Oxyniti may contact me on WhatsApp or phone about this estimate and a free DO-meter demo.</label>
+        </div>
+        <p class="field-hint" data-i18n="lead.privacy">Your details are used only to prepare and send your report and to arrange the demo. They are not sold or shared.</p>
+        <div class="cta-row">
+          <button type="submit" id="lead-submit" class="btn btn-warm" data-i18n="lead.submit">Request my report</button>
+          <button type="button" id="lead-cancel" class="btn btn-ghost" data-i18n="lead.cancel">Not now</button>
+        </div>
+      </form>
+
+      <div id="lead-received" class="lead-received hidden">
+        <h3 data-i18n="lead.received_h">Request received</h3>
+        <p class="lead-ref"><span data-i18n="lead.received_ref">Reference</span>: <b id="lead-received-ref"></b></p>
+        <p id="lead-received-p"></p>
+        <div class="cta-row">
+          <a id="lead-cta-whatsapp" class="btn btn-warm" href="https://wa.me/919659727477" target="_blank" rel="noopener" data-i18n="lead.cta_whatsapp">Send request on WhatsApp</a>
+          <button id="lead-cta-copy" class="btn btn-ghost" type="button" data-i18n="lead.cta_copy">Copy request</button>
+        </div>
+        <p class="copy-status" id="lead-copy-status" role="status"></p>
+        <p class="field-hint"><button type="button" class="link-btn" id="lead-request-again" data-i18n="lead.request_again">Submit a different request</button></p>
+      </div>
+    </div>
+  </dialog>
+
 </main>
 
 <footer class="site-footer">
@@ -454,6 +562,8 @@
 <script src="js/charts.js"></script>
 <script src="js/map.js"></script>
 <script src="js/model.js"></script>
+<script src="js/leads.config.js"></script>
+<script src="js/leads.js"></script>
 <script src="js/ui.js"></script>
 </body>
 </html>

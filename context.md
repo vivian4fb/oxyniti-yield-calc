@@ -1,6 +1,6 @@
 # 2_Business/NBG/oxyniti_yield _calc — context
 
-*Updated 2026-09-21. State: ACTIVE*
+*Updated 2026-09-22. State: ACTIVE*
 
 ## What this is
 
@@ -22,6 +22,8 @@ The folder name carries a stray space before `_calc`. Always quote the path.
    authorised, each with status and basis. `plan/DEVIATIONS.md` — every supersession.
 4. `plan/QA_REPORT.md` and `plan/DATA_STATUS.md` — gate results and per-field data quality.
 5. `research/` — the sourced data. Source of truth; builders never edit it.
+6. `plan/LEAD_CAPTURE.md` and `tools/leads/README.md` — the report gate, the lead form, the
+   vetting rules and the owner's runbook (added 2026-09-22).
 
 ## Constraints
 
@@ -34,9 +36,18 @@ The folder name carries a stray space before `_calc`. Always quote the path.
 
 ## State
 
-*Measured 2026-09-21.* Built, gated and published. `node --test tests/*.test.mjs` 43/43;
-`python tests/compare.py` exit 0 on 29 scenarios against the independent Python oracle;
-self-test and solubility checks pass; Chrome console clean; screenshots in `tests/screenshots/`.
+*Measured 2026-09-22.* Built, gated and published. `node --test tests/*.test.mjs` 57/57;
+`python -m unittest tests/test_vet_lead.py` 21/21; `node tests/smoke_leads.mjs` PASS (22
+checks); `python tests/compare.py` exit 0 on 29 scenarios against the independent Python
+oracle; Chrome console clean; screenshots in `tests/screenshots/`.
+
+**Lead capture (2026-09-22).** The page now shows only the extra-harvest band from the model.
+Profit, payback, units and the three charts read "In your pond report"; the report is built by
+`tools/leads/make_report.py` from the independent oracle after `vet_lead.py` clears the
+request (bot and competitor signals; REJECT / REVIEW / APPROVE). Requests travel by WhatsApp
+deep link with an `OXY1.` reference code (works today) and, once the owner sets
+`endpoint` in `site/js/leads.config.js`, by JSON POST as well. Lead files under `tools/leads/`
+are git-ignored. The model itself remains public in the repository — a gate, not a secret.
 
 Default scenario (GIFT tilapia, Tiruchirappalli, 1 acre, 5,965/acre, 1.5 L/min per unit):
 extra harvest 10–20 kg/crop, extra profit about −₹0.57 L/year, no payback. At 20 L/min per unit
@@ -45,7 +56,10 @@ unit is the number that decides the business case.
 
 ## Next
 
-Vivian: replace the ASSUMED prices with real quotes; get the OEM oxygen delivery in kg O2/h;
+Vivian: create the Web3Forms key and set `endpoint` (5 minutes, `tools/leads/README.md`) so
+Instagram-ad traffic that stops short of WhatsApp still lands in the inbox; decide whether
+the model should move server-side and the repository go private (the only way to keep the
+model itself from competitors); replace the ASSUMED prices with real quotes; get the OEM oxygen delivery in kg O2/h;
 decide the live-site claims (`DEVIATIONS.md`); native Tamil review; then integrate into
 oxyniti.com. Data refinement: GIFT tilapia's tolerable range is the FAO lethal pair [11, 42],
 so hill stations penalise growth through the size factor rather than a warning.

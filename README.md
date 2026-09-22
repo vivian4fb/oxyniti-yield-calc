@@ -16,12 +16,23 @@ the free demo.
 
 | Path | What it holds |
 |---|---|
-| `site/` | The published page: `index.html`, `css/`, `js/` (model, page, charts, map, i18n), `data/` (classic-script data files), vendored Leaflet 1.9.4, brand assets, and its own README with the data sources and licences |
+| `site/` | The published page: `index.html`, `css/`, `js/` (model, page, charts, map, i18n, lead capture), `data/` (classic-script data files), vendored Leaflet 1.9.4, brand assets, and its own README with the data sources and licences |
 | `plan/` | Model specification with amendments A1–A9, execution plan, coefficients with status labels, deviations log, data status, QA report, owner inputs |
 | `research/` | The sourced data behind everything: species parameters, IMD 1991–2020 climate normals for 32 stations, dissolved-oxygen physics, economics and device evidence, district GeoJSON, hotspots |
 | `tests/` | Node contract tests for the model, an independent Python oracle, a scenario set, a comparator with a self-test, and QA screenshots |
 | `tools/build_data.py` | Rebuilds `site/data/` from `research/` and `plan/` deterministically |
+| `tools/leads/` | Owner-side lead vetting (`vet_lead.py`) and report building (`make_report.py`); runbook in its README. Its `inbox/`, `reports/` and `ledger.jsonl` are git-ignored personal data |
 | `.github/workflows/pages.yml` | Publishes `site/` to GitHub Pages on every push to `main` |
+
+## Lead capture and the report gate
+
+The page shows the extra-harvest band live and nothing else from the model. Extra profit,
+payback, unit sizing, the oxygen budget and the charts are delivered as a written report,
+requested through "Get my pond report" (name, Indian mobile, village, role, pond count,
+consent) and sent by the owner **after vetting** the request for bots and competitors. Two
+routes carry the request out of this static page: a WhatsApp deep link with a reference
+code (always on) and an optional JSON endpoint set in `site/js/leads.config.js`. Design in
+`plan/LEAD_CAPTURE.md`; owner runbook in `tools/leads/README.md`.
 
 ## Running it locally
 
@@ -38,8 +49,10 @@ not send for local files.
 ## Tests
 
 ```sh
-node --test tests/*.test.mjs          # 38 contract tests on the JavaScript model
-python tests/compare.py               # JavaScript vs independent Python oracle, 26+ scenarios
+node --test tests/*.test.mjs          # 43 model contract tests + 14 lead-capture helper tests
+python -m unittest tests/test_vet_lead.py   # lead vetting, reference decoding, report build (21)
+node tests/smoke_leads.mjs            # headless-Chrome check of the gate and the form (serve site/ first)
+python tests/compare.py               # JavaScript vs independent Python oracle, 29 scenarios
 python tests/compare.py --self-test   # proves the comparator detects an injected defect
 python tests/compare.py --doonly      # oxygen-solubility table check (Benson & Krause 1984)
 ```

@@ -3,6 +3,12 @@
    CARD/RESULTS CARD/LEAD CAPTURE brief. Never fabricates a number: every figure shown comes
    from `result` (interface 4.2) or from the OXY_DATA envelope fields (interface 4.1).
 
+   Report gate (plan/LEAD_CAPTURE.md, 2026-09-22): while OxyLeads.isLocked() the extra-harvest
+   band is the only model output written to the page. Profit, payback, investment, unit
+   sizing, the seasonal strip, the station comparison and the waterfall are replaced by a
+   "in your pond report" label and never enter the DOM; the owner sends them as a report
+   after vetting the request.
+
    classic script — no import/export, works from file://
 */
 (function () {
@@ -44,7 +50,6 @@
   var state = {
     data: null,
     lastResult: null,
-    lastSummary: "",
     debounceTimer: null,
     settingControlsFromCode: false,
     // the last real tariff preset the farmer had selected, so switching to "Custom" can start
@@ -59,6 +64,23 @@
 
   function T(key, fallback) {
     return (window.OxyI18n && window.OxyI18n.t) ? window.OxyI18n.t(key, fallback) : fallback;
+  }
+  // The report gate. Defaults to locked when leads.js is absent, never to open.
+  function gateLocked() {
+    return (window.OxyLeads && typeof window.OxyLeads.isLocked === "function") ? window.OxyLeads.isLocked() : true;
+  }
+  function setLockedBand(id, subEl) {
+    var elx = document.getElementById(id);
+    if (!elx) return;
+    elx.textContent = T("results.locked", "In your pond report");
+    elx.classList.add("is-locked");
+    if (subEl) subEl.textContent = T("results.locked_sub", "Sent to your WhatsApp after we check your request");
+  }
+  function setChartLocked(chartId, noteId, locked) {
+    var chart = document.getElementById(chartId);
+    var note = document.getElementById(noteId);
+    if (locked && chart) chart.innerHTML = "";
+    if (note) note.classList.toggle("hidden", !locked);
   }
 
   /* ================================================================
@@ -732,6 +754,13 @@
   function runStationCompare() {
     var tbody = document.getElementById("station-compare-tbody");
     if (!tbody) return;
+    if (gateLocked()) {
+      state.compareRows = null;
+      renderCompareStatus(T("chart.locked", "Included in your pond report."));
+      setChartLocked(null, "compare-locked", true);
+      return;
+    }
+    setChartLocked(null, "compare-locked", false);
     if (!window.OxyModel || typeof window.OxyModel.compareStations !== "function" || !state.data) {
       state.compareRows = null;
       renderCompareStatus(T("station_compare.unavailable", "Station comparison is not available yet."));
@@ -881,31 +910,41 @@
       }
     }
 
+    var locked = gateLocked();
     var d = result.delta || {};
     if (d.low && d.high) {
       document.getElementById("res-harvest").textContent =
         bandJoin(fmtKg(d.low.kg_crop), fmtKg(d.high.kg_crop), d.low.kg_crop, d.high.kg_crop) + " per crop  ·  " +
         bandJoin(fmtKg(d.low.kg_year), fmtKg(d.high.kg_year), d.low.kg_year, d.high.kg_year) + " per year";
-      document.getElementById("res-profit").textContent =
-        bandJoin(fmtINR(d.low.profit_crop), fmtINR(d.high.profit_crop), d.low.profit_crop, d.high.profit_crop) + " per crop  ·  " +
-        bandJoin(fmtINR(d.low.profit_year), fmtINR(d.high.profit_year), d.low.profit_year, d.high.profit_year) + " per year";
+      if (locked) {
+        var profitBand = document.getElementById("res-profit").parentNode;
+        setLockedBand("res-profit", profitBand ? profitBand.querySelector(".band-sub") : null);
+      } else {
+        document.getElementById("res-profit").textContent =
+          bandJoin(fmtINR(d.low.profit_crop), fmtINR(d.high.profit_crop), d.low.profit_crop, d.high.profit_crop) + " per crop  ·  " +
+          bandJoin(fmtINR(d.low.profit_year), fmtINR(d.high.profit_year), d.low.profit_year, d.high.profit_year) + " per year";
+      }
     }
 
     var pb = result.payback || {};
     var pbEl = document.getElementById("res-payback");
-    if (pb.status === "ok") {
-      pbEl.textContent = fmtNum(pb.months_low, 1) + "–" + fmtNum(pb.months_high, 1) + " months";
-    } else {
-      pbEl.textContent = pb.reason ? capitalize(pb.reason) : "Blocked";
-    }
-    // amendment A9.3: "Investment: n x (unit + concentrator) - subsidy" — read directly from
-    // result.payback.capex (already computed by the model) rather than recomputed here.
     var investEl = document.getElementById("res-investment");
-    if (investEl) {
-      if (pb.capex != null) {
-        investEl.textContent = T("results.investment", "Investment") + ": " + fmtINR(pb.capex);
+    if (locked) {
+      setLockedBand("res-payback", investEl);
+    } else {
+      if (pb.status === "ok") {
+        pbEl.textContent = fmtNum(pb.months_low, 1) + "–" + fmtNum(pb.months_high, 1) + " months";
       } else {
-        investEl.textContent = "";
+        pbEl.textContent = pb.reason ? capitalize(pb.reason) : "Blocked";
+      }
+      // amendment A9.3: "Investment: n x (unit + concentrator) - subsidy" — read directly from
+      // result.payback.capex (already computed by the model) rather than recomputed here.
+      if (investEl) {
+        if (pb.capex != null) {
+          investEl.textContent = T("results.investment", "Investment") + ": " + fmtINR(pb.capex);
+        } else {
+          investEl.textContent = "";
+        }
       }
     }
 
@@ -915,7 +954,9 @@
     var u = result.unit || {};
     var unitsEl = document.getElementById("res-units");
     var unitsSubEl = unitsEl && unitsEl.parentNode ? unitsEl.parentNode.querySelector(".band-sub") : null;
-    if (u.n_units != null) {
+    if (locked) {
+      setLockedBand("res-units", unitsSubEl);
+    } else if (u.n_units != null) {
       unitsEl.textContent = u.n_units + " × " + (u.label || u.id || "unit") + (u.sizing === "manual" ? " (manual)" : "");
       var subBits = [];
       if (u.sizing === "auto") {
@@ -942,14 +983,18 @@
     renderWarnings(result.warnings || []);
     renderAssumptions(result.assumptions || []);
 
-    if (window.OxyCharts) {
+    setChartLocked("season-strip", "season-locked", locked);
+    setChartLocked("waterfall", "waterfall-locked", locked);
+    if (!locked && window.OxyCharts) {
       var seasonEl = document.getElementById("season-strip");
       var wfEl = document.getElementById("waterfall");
       if (seasonEl) window.OxyCharts.renderSeasonStrip(seasonEl, result);
       if (wfEl) window.OxyCharts.renderWaterfall(wfEl, result);
     }
 
-    updateWhatsApp(result);
+    if (window.OxyLeads && typeof window.OxyLeads.noteEvaluation === "function") {
+      window.OxyLeads.noteEvaluation(readInputsFromControls(), result);
+    }
   }
 
   function appendBaselineStat(container, label, value) {
@@ -961,10 +1006,17 @@
     container.appendChild(span);
   }
 
+  // Warnings that state an economic or sizing conclusion belong to the report while the gate
+  // is locked; input-side warnings (thermal range, price range, concentrator power) stay,
+  // because they help the farmer fix the inputs before asking.
+  var REPORT_ONLY_WARNINGS = { NO_PAYBACK_AT_PUBLISHED_O2: true, NOT_OXYGEN_LIMITED: true, CEILING_CLAMPED: true, SIZING_CAPPED: true };
+
   function renderWarnings(list) {
     var ul = document.getElementById("res-warnings");
     ul.innerHTML = "";
+    var locked = gateLocked();
     list.forEach(function (w) {
+      if (locked && REPORT_ONLY_WARNINGS[w.code]) return;
       var li = document.createElement("li");
       li.className = "warning-item" + (SEVERE_WARNINGS[w.code] ? " is-severe" : "");
       var key = WARNING_KEYS[w.code];
@@ -1028,58 +1080,6 @@
   /* ================================================================
      lead capture — WhatsApp + copy summary
      ================================================================ */
-  function buildSummary(result, inputs) {
-    if (!result || !result.delta) return "";
-    var spRecord = findSpecies(state.data, inputs.species);
-    var speciesLabel = spRecord ? (spRecord.common_name_en || spRecord.id) : inputs.species;
-    // amendment A9.5: include the city only when one was actually chosen (inputs.station_name
-    // set) — otherwise the district already says where the pond is.
-    var districtLine = inputs.district;
-    if (inputs.station_name) districtLine += " (" + inputs.station_name + ")";
-    var lines = [
-      districtLine,
-      speciesLabel,
-      fmtNum(inputs.area_acre, 2) + " acre",
-      fmtNum(Math.round(inputs.density_per_acre)) + "/acre",
-      "extra profit " + bandJoin(fmtINR(result.delta.low.profit_year), fmtINR(result.delta.high.profit_year),
-        result.delta.low.profit_year, result.delta.high.profit_year) + "/year",
-      "from the Oxyniti yield calculator"
-    ];
-    return lines.join(", ");
-  }
-  function updateWhatsApp(result) {
-    var inputs = readInputsFromControls();
-    var summary = buildSummary(result, inputs);
-    state.lastSummary = summary;
-    var a = document.getElementById("cta-whatsapp");
-    a.href = summary ? ("https://wa.me/919659727477?text=" + encodeURIComponent(summary)) : "https://wa.me/919659727477";
-  }
-  function wireCopyButton() {
-    document.getElementById("cta-copy").addEventListener("click", function () {
-      var text = state.lastSummary || "";
-      var statusEl = document.getElementById("copy-status");
-      function ok() { statusEl.textContent = T("results.copy_done", "Copied to clipboard."); }
-      function fail() { statusEl.textContent = T("results.copy_failed", "Couldn't copy automatically — select and copy the summary text manually."); }
-      if (!text) { fail(); return; }
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(ok, fail);
-      } else {
-        try {
-          var ta = document.createElement("textarea");
-          ta.value = text;
-          ta.style.position = "fixed";
-          ta.style.opacity = "0";
-          document.body.appendChild(ta);
-          ta.focus();
-          ta.select();
-          var success = document.execCommand("copy");
-          document.body.removeChild(ta);
-          if (success) ok(); else fail();
-        } catch (e) { fail(); }
-      }
-    });
-  }
-
   /* ================================================================
      fixture mode (?fixture=1)
      ================================================================ */
@@ -1226,7 +1226,11 @@
     wireThemeToggle();
     window.OxyI18n.applyTranslations(document);
     wireLangToggle();
-    wireCopyButton();
+    if (window.OxyLeads && typeof window.OxyLeads.init === "function") {
+      try { window.OxyLeads.init(); } catch (e) { console.error("OxyLeads.init failed", e); }
+    } else {
+      showBanner(T("banner.no_leads", "Lead capture not loaded"));
+    }
 
     var params = new URLSearchParams(window.location.search);
     var isFixture = params.get("fixture") === "1";

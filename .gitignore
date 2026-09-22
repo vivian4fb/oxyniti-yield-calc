@@ -13,3 +13,8 @@ Thumbs.db
 
 # Local scratch
 *.log
+
+# Lead capture: personal data, never committed (tools/leads/README.md)
+tools/leads/inbox/
+tools/leads/reports/
+tools/leads/ledger.jsonl

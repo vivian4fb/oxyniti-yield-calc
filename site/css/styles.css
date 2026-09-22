@@ -411,3 +411,61 @@ table.compare-table .row-warn { color: var(--warn); cursor: help; margin-left: 4
   .species-row { grid-template-columns: 1fr 1fr; }
   .header-controls { width: 100%; justify-content: space-between; }
 }
+
+/* ============================================================
+   REPORT GATE AND LEAD FORM (plan/LEAD_CAPTURE.md, 2026-09-22)
+   ============================================================ */
+.result-band .band-value.is-locked {
+  font-size: 1.05rem; font-weight: 700; color: var(--text-dim); letter-spacing: 0.01em;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.result-band .band-value.is-locked::before { content: "\1F512"; font-size: 0.95rem; }
+.gate-note {
+  display: flex; gap: 10px; align-items: flex-start; font-size: 0.86rem; line-height: 1.45;
+  background: rgba(255, 255, 255, 0.07); border: 1px dashed rgba(255, 255, 255, 0.28);
+  border-radius: var(--radius-sm); padding: 12px 14px; color: var(--text-dim);
+}
+.gate-note .gate-lock { flex-shrink: 0; }
+.chart-locked {
+  margin: 8px 0 0; padding: 26px 16px; text-align: center; color: var(--fg-dim); font-weight: 600;
+  border: 1px dashed var(--border); border-radius: var(--radius-sm);
+}
+.chart-locked::before { content: "\1F512  "; }
+
+.lead-dialog {
+  border: none; padding: 0; background: transparent; max-width: min(640px, calc(100vw - 32px));
+  width: 100%; color: var(--fg-strong);
+}
+.lead-dialog::backdrop { background: rgba(4, 31, 38, 0.72); backdrop-filter: blur(3px); }
+.lead-dialog[open] { display: block; }
+.lead-dialog:not([open]) { display: none; }
+.lead-dialog-inner {
+  position: relative; background: var(--bg-panel-solid); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: clamp(20px, 3vw, 32px); box-shadow: var(--shadow);
+  max-height: calc(100vh - 32px); overflow-y: auto;
+}
+.lead-close {
+  position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid var(--border); background: rgba(127, 127, 127, 0.12); color: var(--fg-strong);
+  font-size: 1.4rem; line-height: 1; cursor: pointer;
+}
+.lead-form h3, .lead-received h3 { margin: 0 0 6px; font-size: 1.35rem; }
+.lead-form .sub, .lead-received p { color: var(--fg-dim); font-size: 0.92rem; line-height: 1.5; margin: 0 0 16px; }
+.lead-form .field input[type="tel"], .lead-form .field input[type="text"], .lead-form .field input[type="number"], .lead-form .field select {
+  width: 100%; min-height: 44px; background: rgba(127, 127, 127, 0.1); color: var(--fg-strong);
+  border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px;
+  font-family: var(--font-body); font-size: 0.94rem; outline: none;
+}
+.lead-form .field input[readonly] { opacity: 0.7; }
+.lead-form .field.has-error input, .lead-form .field.has-error select { border-color: var(--bad); box-shadow: 0 0 0 3px rgba(255, 107, 74, 0.2); }
+.lead-form .field-check.has-error label { color: var(--bad); }
+.lead-error {
+  background: rgba(255, 107, 74, 0.14); border: 1px solid rgba(255, 107, 74, 0.5);
+  border-radius: var(--radius-sm); padding: 10px 14px; font-weight: 600; margin-bottom: 14px; font-size: 0.9rem;
+}
+.lead-hp { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+.lead-form .cta-row { margin-top: 18px; }
+.lead-received .lead-ref { font-size: 1rem; color: var(--fg-strong); }
+.lead-received .lead-ref b { font-family: var(--font-display); letter-spacing: 0.04em; }
+.link-btn { background: none; border: none; padding: 0; color: var(--aqua); font: inherit; cursor: pointer; text-decoration: underline; }
+.cf-turnstile { margin: 10px 0; }
